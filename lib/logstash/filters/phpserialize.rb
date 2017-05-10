@@ -21,7 +21,7 @@ class LogStash::Filters::Phpserialize < LogStash::Filters::Base
   
   config :source, :validate => :string, :default => "message"
   config :target, :validate => :string
-  
+  config :tag_on_failure, :validate => :array, :default => ["_phpunserializefailure"]
 
   public
   def register
@@ -30,10 +30,17 @@ class LogStash::Filters::Phpserialize < LogStash::Filters::Base
 
   public
   def filter(event)
+    source = event.get(@source)
+    return if source.nil?
 
-    data = PHP.unserialize(event.get(@source))
-    if @source
-      event.set(@target, data)
+    begin
+      data = PHP.unserialize(source)
+      if data
+        event.set(@target, data)
+      end
+    rescue StandardError
+      @tag_on_failure.each {|tag| event.tag(tag)}
+      return
     end
 
     # filter_matched should go in the last line of our successful code

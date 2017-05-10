@@ -19,6 +19,55 @@ describe LogStash::Filters::Phpserialize do
     end
   end
 
+  describe "parse empty field" do
+    let(:config) do <<-CONFIG
+      filter {
+        phpserialize {
+          target => "php"
+        }
+      }
+    CONFIG
+    end
+
+    sample('') do
+      expect(subject).not_to include('php')
+      expect(subject.get('tags')).to include('_phpunserializefailure')
+    end
+  end
+
+  describe "parse non-existing field" do
+    let(:config) do <<-CONFIG
+      filter {
+        phpserialize {
+          source => "in"
+          target => "php"
+        }
+      }
+    CONFIG
+    end
+
+    sample('') do
+      expect(subject).not_to include('php')
+      expect(subject.get('tags')).to be_nil
+    end
+  end
+
+  describe "parse null value" do
+    let(:config) do <<-CONFIG
+      filter {
+        phpserialize {
+          target => "php"
+        }
+      }
+    CONFIG
+    end
+
+    sample('N;') do
+      expect(subject).not_to include('php')
+      expect(subject.get('tags')).to be_nil
+    end
+  end
+
   describe "parse from source field" do
     let(:config) do <<-CONFIG
       filter {

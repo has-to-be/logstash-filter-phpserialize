@@ -7,15 +7,13 @@ describe LogStash::Filters::Phpserialize do
     let(:config) do <<-CONFIG
       filter {
         phpserialize {
-          target => "php"
         }
       }
     CONFIG
     end
 
     sample('s:11:"Hello World";') do
-      expect(subject).to include('php')
-      expect(subject.get('php')).to eq('Hello World')
+      expect(subject.get('message')).to eq('Hello World')
     end
   end
 
@@ -23,15 +21,13 @@ describe LogStash::Filters::Phpserialize do
     let(:config) do <<-CONFIG
       filter {
         phpserialize {
-          target => "php"
         }
       }
     CONFIG
     end
 
     sample('') do
-      expect(subject).not_to include('php')
-      expect(subject.get('tags')).to include('_phpunserializefailure')
+      expect(subject.get('message')).to eq('')
     end
   end
 
@@ -40,14 +36,13 @@ describe LogStash::Filters::Phpserialize do
       filter {
         phpserialize {
           source => "in"
-          target => "php"
         }
       }
     CONFIG
     end
 
     sample('') do
-      expect(subject).not_to include('php')
+      expect(subject.get('message')).to eq('')
       expect(subject.get('tags')).to be_nil
     end
   end
@@ -56,15 +51,28 @@ describe LogStash::Filters::Phpserialize do
     let(:config) do <<-CONFIG
       filter {
         phpserialize {
-          target => "php"
         }
       }
     CONFIG
     end
 
     sample('N;') do
-      expect(subject).not_to include('php')
-      expect(subject.get('tags')).to be_nil
+      expect(subject.get('message')).to be_nil
+    end
+  end
+
+  describe "parse corrupt value" do
+    let(:config) do <<-CONFIG
+      filter {
+        phpserialize {
+        }
+      }
+    CONFIG
+    end
+
+    sample('Hello World') do
+      expect(subject.get('message')).to eq('Hello World')
+      expect(subject.get('tags')).to include('_phpunserializefailure')
     end
   end
 
@@ -73,13 +81,27 @@ describe LogStash::Filters::Phpserialize do
       filter {
         phpserialize {
           source => "in"
-          target => "php"
         }
       }
     CONFIG
     end
 
     sample("in" => 'i:42;') do
+      expect(subject.get('message')).to eq(42)
+    end
+  end
+
+  describe "parse into target field" do
+    let(:config) do <<-CONFIG
+      filter {
+        phpserialize {
+          target => "php"
+        }
+      }
+    CONFIG
+    end
+
+    sample('i:42;') do
       expect(subject).to include('php')
       expect(subject.get('php')).to eq(42)
     end

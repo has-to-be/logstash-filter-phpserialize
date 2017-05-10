@@ -35,9 +35,7 @@ class LogStash::Filters::Phpserialize < LogStash::Filters::Base
 
     begin
       data = PHP.unserialize(source)
-      if data
-        event.set(@target, data)
-      end
+      event.set(@target, data)
     rescue StandardError
       @tag_on_failure.each {|tag| event.tag(tag)}
       return

@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name          = 'logstash-filter-phpserialize'
-  s.version       = '1.0'
+  s.version       = '1.1'
   s.licenses      = ['BSD-3-Clause']
   s.summary       = 'Allow to decode phpserialized values'
   s.homepage      = 'https://github.com/has-to-be/logstash-filter-phpserialize'

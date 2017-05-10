@@ -20,7 +20,7 @@ class LogStash::Filters::Phpserialize < LogStash::Filters::Base
   config_name "phpserialize"
   
   config :source, :validate => :string, :default => "message"
-  config :target, :validate => :string
+  config :target, :validate => :string, :default => "message"
   config :tag_on_failure, :validate => :array, :default => ["_phpunserializefailure"]
 
   public
